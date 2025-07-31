@@ -1,0 +1,83 @@
+--- 
+- name: Partition 
+  hosts: all 
+  become: true 
+  tasks:  
+    - name: Creating partation
+      block: 
+        - name: 
+          block: 
+            - name: 1500 mb 
+              parted: 
+                device: /dev/sde 
+                number: 1 
+                state:  present 
+                part_end: '1500 MiB' 
+              when: ansible_devices.sde.size > '1500 MiB' 
+            - name: 15900 m   
+              parted: 
+                device:  /dev/sdf 
+                number: 1     
+                state:  present 
+                part_end: '1500 MiB' 
+              when: ansible_devices.sdf.size > '1500 MiB' 
+        - name: 
+          block: 
+            - name: message 
+              debug: 
+                msg:  "not engo" 
+              when: ansible_devices.sde.size < '1500 MiB' or ansible_devices.sdf.size < '1500 MiB' 
+            - name: 800 mb      
+              parted:    
+                device:  /dev/sde 
+                number: 1        
+                state:  present  
+                part_end: '800 MiB'  
+              when: ansible_devices.sde.size < '1500 MiB' 
+            - name: 800m m      
+              parted:    
+                device:  /dev/sdf 
+                number: 1        
+                state:  present  
+                part_end: '800 MiB'  
+              when: ansible_devices.sdf.size < '1500 MiB' 
+          when: ansible_devices.sde is defined or ansible_devices.sdf is defined       
+           
+    - name: filesystem       
+      filesystem: 
+        fstype: ext4 
+        dev: /dev/sde 
+      when: ansible_devices.sde is defined 
+    - name: filesystem 
+      filesystem: 
+        fstype: ext4 
+        dev: /dev/sdf 
+      when: ansible_devices.sdf is defined 
+    - name: directiry 
+      file: 
+        path: /syspart 
+        state: directory 
+      when: ansible_devices.sde is defined 
+    - name: directiry 
+      file: 
+        path: /syspart1 
+        state: directory 
+      when: ansible_devices.sdf is defined 
+    - name: mount 
+      mount:  
+        path: /syspart 
+        src: /dev/sde 
+        fstype: ext4 
+        state: mounted 
+      when: ansible_devices.sde is defined 
+    - name: mount 
+      mount: 
+        path: /syspart1 
+        src: /dev/sdf 
+        fstype: ext4 
+        state: mounted 
+      when: ansible_devices.sdf is defined 
+    - name: msg 
+      debug: 
+        msg: "No Disk" 
+      when: ansible_devices.sde is not defined or ansible_devices.sdf is not defined 
