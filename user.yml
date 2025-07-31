@@ -1,0 +1,10 @@
+---
+- name: Working with ansible user
+  hosts: all
+  become: true
+  tasks: 
+    - name: add user
+      ansible.builtin.user:
+        name: masud
+        state: present
+...
